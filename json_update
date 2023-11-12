@@ -1,0 +1,53 @@
+#!/bin/bash
+function json_change_func(){
+shops_id_for_replace=$1 #должна быть, принимает входящее значение замены для региона
+cp -rp config.json config_auto.json
+
+#блок работы с записью вида: "shops": [    {  "region_id": "55586", "id": "59300", ...]    }
+if [ -n "$(jq '.shops[0].id' config.json | awk '(/^.[0-9]+.$/) {print $0}')" ]
+then
+	
+	jq --arg a "${shops_id_for_replace}" '.shops[0].id = $a' config.json > "tmp" && mv "tmp" config.json
+fi
+#конец блока
+
+
+#блок работы со стандартной записью в корне, вида shops: "1234" тело скрипта
+if [ -n "$(jq '.shops' config.json | awk '(/^"[0-9]+"$/) {print $0}')" ]
+then
+
+	jq --arg c "${shops_id_for_replace}" '.shops = $c' config.json > "tmp" && mv "tmp" config.json
+
+fi
+#конец блока
+
+
+
+#запись вида shops: [1234] ещё раз, тело скрипта
+if [ -n "$(jq '.shops[0]' config.json | awk '(/^[0-9]+$/) {print $0}')" ]
+then
+
+jq --arg d "${shops_id_for_replace}" '.shops[0] = $d' config.json > "tmp" && mv "tmp" config.json
+
+fi
+
+#work with input_json_region 
+if [ "$need_region" = "y" ]
+then
+	check_region_1="$(cat config.json | jq '.region')"
+	if [ -n "$check_region_1" ] && [ "$check_region_1" != "null" ]
+	then
+		jq --arg b "${input_json_region}" '.region = $b' config.json > "tmp" && mv "tmp" config.json
+		jq '.region_ru = ""' config.json > "tmp" && mv "tmp" config.json
+		jq '.info_region = ""' config.json > "tmp" && mv "tmp" config.json
+	fi
+fi
+
+}
+#json_change_func $shops_id_for_replace_1
+
+
+
+
+
+

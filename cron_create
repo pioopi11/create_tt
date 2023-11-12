@@ -1,0 +1,45 @@
+#!/bin/bash
+function cron_create_func() {
+#array_of_copied_folder=(abcd efgj scx)
+#cron_user_minute=2
+#cron_system_minute=2
+#need_cron="y"
+#cron_user_hour="4"
+
+	cd $1
+	crontab -l > mycron
+	cp -rp mycron mycron.bak
+	local cron_input_minute_interval_local=0
+	local cron_count_input_minute_interval_local
+
+
+	if [ "$need_cron" = "y" ] && [ -n "$cron_user_minute" ];
+	then
+		cron_input_minute_interval_local=$cron_user_minute
+		cron_count_input_minute_interval_local=$cron_user_minute
+
+	else
+		cron_input_minute_interval_local=$cron_system_minute
+		cron_count_input_minute_interval_local=$cron_system_minute
+
+	fi
+
+
+	for i in ${array_of_copied_folder[@]}
+	do
+		if [ "$need_pipenv" = "y" ]
+		then
+			echo "$cron_count_input_minute_interval_local $cron_user_hour * * * cd $i && /home/dedicadmin/.local/bin/pipenv run bash run.sh" >> mycron
+			cron_count_input_minute_interval_local=$[cron_input_minute_interval_local + cron_count_input_minute_interval_local]
+		
+		else
+			echo "$cron_count_input_minute_interval_local $cron_user_hour * * * bash $i/run.sh" >> mycron
+			cron_count_input_minute_interval_local=$[cron_input_minute_interval_local + cron_count_input_minute_interval_local]
+		fi
+	done
+
+crontab mycron
+rm mycron
+}
+
+#cron_create_func

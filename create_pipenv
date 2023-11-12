@@ -1,0 +1,33 @@
+#!/bin/bash
+function create_pipenv_func() { 
+	for i in ${array_of_copied_folder[@]}
+	do
+
+#if [ -d $i  -a ! -h $i ] 
+#then  
+
+	cd -- "$i"  
+	pipenv sync
+
+	if [ $? -eq 1 ] 
+	then
+		if [ "$(ls | grep Pipfile.dist)" = "Pipfile.dist" ]
+		then
+
+			mv -f Pipfile Pipfile_auto.bak
+			mv -f Pipfile.lock Pipfile_auto.lock.bak
+			cp -rp Pipfile.dist Pipfile
+			pipenv install
+
+		else
+			echo "mb install env+packages" 
+
+		fi #Pipfile
+	fi #sync
+
+#fi 
+done 
+
+}
+
+#create_pipenv

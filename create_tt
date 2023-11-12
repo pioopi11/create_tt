@@ -1,0 +1,102 @@
+#!/bin/bash
+
+source user_input
+source folder_copy
+source rename_folder
+source create_pipenv
+source cron_create
+source json_update
+
+destination_folder=""
+array_of_tt_id=()
+array_of_copied_folder=()
+tt_file=""
+need_pipenv=""
+need_start_after_compleet=""
+cron_user_hour=""
+cron_system_minute=5
+need_region="y"
+input_json_region=""
+counter=0
+global_pwd=""
+need_cron=""
+cron_user_minute=""
+
+
+
+global_pwd="$(pwd)"
+
+
+user_input_func
+
+
+echo "destination_folder= "$destination_folder
+
+
+folder_copy_func
+echo "block folder_copy_func finished"
+
+
+#pipenv
+if [ "$need_pipenv" = "y" ]
+then
+	create_pipenv_func
+	echo "block create_pipenv_func finished"
+fi
+
+
+# work with json block
+echo "input_json_region= " $input_json_region
+for ((i=0;i<${#array_of_copied_folder[@]};i++)); do
+	cd -- "${array_of_copied_folder[i]}"
+	if [ $? -eq 0 ]
+	then 
+		json_change_func ${array_of_tt_id[i]}
+	else
+		echo "блок json_change_func не отработал: не удалось перейти в папку "${array_of_copied_folder[i]} >>err_log.txt
+	fi
+done
+echo "block json_change_func finished"
+
+#cron
+if [ "$need_cron" = "y" ]
+then
+	cron_create_func $global_pwd
+	echo "block cron_create_func finished"
+fi
+
+
+#del dump block
+for i in ${array_of_copied_folder[@]}
+do
+	cd -- $i
+	mv -f dump_saved_products.json dump_saved_products.json.bak
+	mv -f dump_files.json dump_files.json.bak
+	mv -f dump_catids.json dump_catids.json.bak
+	mv -f dump_cats.json dump_cats.json.bak
+	mv -f dump_ids.json dump_ids.json.bak
+done
+echo "dump mv done!"
+
+
+#run after create block
+if [ "$need_start_after_compleet" = "y" ]
+then
+	for i in ${array_of_copied_folder[@]}
+	do
+
+	if [ "$need_pipenv" = "y" ]
+	then
+		cd $i && /home/dedicadmin/.local/bin/pipenv run bash run.sh
+
+	else
+		bash $i/run.sh
+
+	fi
+	done
+
+fi
+
+echo "block need_start_after_compleet finished"
+echo "Done!"
+

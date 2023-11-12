@@ -1,0 +1,25 @@
+#!/bin/bash
+function user_input_func() { 
+read -p 'input destination folder: ' destination_folder #работает
+read -p 'input the path to the file, containing TT: ' tt_file #работает
+read -p 'Do you want to enable cron y\n: ' need_cron #работает
+
+if [ "$need_cron" = "y" ]
+then
+	read -p 'input cron hour: ' cron_user_hour #работает
+	read -p 'input minute interval: ' cron_user_minute #работает
+fi
+
+read -p 'Do you want to change "region:" param y\n: ' need_region #работает
+
+if [ "$need_region" = "y" ]
+then
+	read -p 'input "region:" param: ' input_json_region #работает
+fi
+
+read -p 'Do you want to create pipenv y\n: ' need_pipenv #работает
+read -p 'Do you want to start parcer after complete y\n: ' need_start_after_compleet #работает
+
+}
+
+#echo $var1

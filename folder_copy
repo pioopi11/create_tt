@@ -1,0 +1,49 @@
+#!/bin/bash
+function folder_copy_func() { 
+source rename_folder_block/rename_folder
+: > err_log.txt
+
+local last_part_of_path=$(basename $destination_folder)
+local first_part_of_path=$(dirname $destination_folder)
+local count=$(awk 'END{ print NR }' $tt_file)
+
+#gets array with names to copy
+for (( i=1; i <= count; i++ ))
+do 
+	#get line "$i" from test.txt
+	local tt_id_in_file="$(head -n $i $tt_file | tail -n 1)"
+
+	if [ -z $tt_id_in_file ]
+	then
+		continue
+	else
+		local renamed_last_part_of_path="$(rename_folder_func "$last_part_of_path" "$tt_id_in_file")"
+		local renamed_full_path_of_copy_folder="$first_part_of_path"/"$renamed_last_part_of_path"
+		if [ ! -d $renamed_full_path_of_copy_folder ]
+		then
+			array_of_tt_id+=($tt_id_in_file)
+			array_of_copied_folder+=($renamed_full_path_of_copy_folder)
+			#local renamed_last_part_of_path="$(rename_folder_func "$last_part_of_path" "$tt_id_in_file")"
+			#local renamed_full_path_of_copy_folder="$first_part_of_path"/"$renamed_last_part_of_path"
+		else
+			echo "папка "$renamed_full_path_of_copy_folder" уже существует" >>err_log.txt
+		fi
+	fi
+done
+
+#--------
+#cp folders - array_of_copied_folder in module folder_copy
+for i in ${array_of_copied_folder[@]}
+do
+	if [ ! -d $i ]
+	then
+		cp -rp $destination_folder $i 2>>err_log.txt
+	else
+		echo "папка "$i" уже существует" >>err_log.txt
+	fi
+done
+
+}
+
+#folder_copy_func
+

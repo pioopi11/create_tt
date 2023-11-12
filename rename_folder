@@ -1,0 +1,16 @@
+#!/bin/bash
+rename_folder_func(){
+var_for_replace=$2
+echo $(echo $1 | awk 'BEGIN{FS="_"; OFS="_"}{
+	for (i = 1; i <= NF; i++){
+		if ($i~/^[0-9]+/&&$i!~/[a-z]/)
+		{
+			$i=var_in_awk
+		}
+	}
+	
+	print $0
+	}' var_in_awk="${var_for_replace}")
+}
+#rename_folder_func "www_11w1_222_w333_ttt_111_иии_" "000"
+#rename_folder_func "www_11w1_222_w333_ttt_111_иии_" "\$1 ~ /per/ && \$1 !~ /test/ {print $0}" 
